@@ -23,6 +23,32 @@
 
 open Base
 
+let char_to_digit c = (Char.to_int c) - (Char.to_int '0')
+
+let calibration_value s =
+    let rec loop = function
+        | [] -> []
+        | '0'..'9' as d :: t -> char_to_digit d :: loop t
+        | 'z' :: 'e' :: 'r' :: ('o' :: _ as t) -> 0 :: loop t
+        | 'o' :: 'n' :: ('e' :: _ as t) -> 1 :: loop t
+        | 't' :: 'w' :: ('o' :: _ as t) -> 2 :: loop t
+        | 't' :: 'h' :: 'r' :: 'e' :: ('e' :: _ as t) -> 3 :: loop t
+        | 'f' :: 'o' :: 'u' :: 'r' :: t -> 4 :: loop t
+        | 'f' :: 'i' :: 'v' :: ('e' :: _ as t) -> 5 :: loop t
+        | 's' :: 'i' :: 'x' :: t -> 6 :: loop t
+        | 's' :: 'e' :: 'v' :: 'e' :: 'n' :: t -> 7 :: loop t
+        | 'e' :: 'i' :: 'g' :: 'h' :: ('t' :: _ as t) -> 8 :: loop t
+        | 'n' :: 'i' :: 'n' :: ('e' :: _ as t) -> 9 :: loop t
+        | _ :: t -> loop t
+    in
+    let digits = String.to_list s |> loop in
+    let tens_digit = List.hd_exn digits in
+    let ones_digit = List.last_exn digits in
+    ones_digit + 10*tens_digit
 
 let () =
-    Stdlib.print_endline "Hello, World!"
+    In_channel.input_lines In_channel.stdin
+    |> List.map ~f:calibration_value
+    |> List.reduce_exn ~f:(+)
+    |> Stdlib.print_int;
+    Stdlib.print_newline ()
