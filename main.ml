@@ -23,12 +23,11 @@
 
 open Base
 
-let char_to_digit c = (Char.to_int c) - (Char.to_int '0')
 
 let calibration_value s =
     let rec loop = function
         | [] -> []
-        | '0'..'9' as d :: t -> char_to_digit d :: loop t
+        | '0'..'9' as d :: t -> ((Char.to_int d) - (Char.to_int '0')) :: loop t
         | 'z' :: 'e' :: 'r' :: ('o' :: _ as t) -> 0 :: loop t
         | 'o' :: 'n' :: ('e' :: _ as t) -> 1 :: loop t
         | 't' :: 'w' :: ('o' :: _ as t) -> 2 :: loop t
@@ -42,13 +41,12 @@ let calibration_value s =
         | _ :: t -> loop t
     in
     let digits = String.to_list s |> loop in
-    let tens_digit = List.hd_exn digits in
-    let ones_digit = List.last_exn digits in
-    ones_digit + 10*tens_digit
+    (List.last_exn digits) + 10*(List.hd_exn digits)
 
 let () =
-    In_channel.input_lines In_channel.stdin
-    |> List.map ~f:calibration_value
-    |> List.reduce_exn ~f:(+)
-    |> Stdlib.print_int;
-    Stdlib.print_newline ()
+    In_channel.fold_lines
+        (fun acc line -> acc + (calibration_value line))
+        0
+        In_channel.stdin
+    |> Stdlib.print_int
+    |> Stdlib.print_newline
